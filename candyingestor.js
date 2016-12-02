@@ -36,6 +36,9 @@ server.get('/', function(req, res, next){
 });
 
 server.get('/placeholder/:id', function(req, res, next){
+	if (typeof(placeholderCollection[req.params.id]) === 'undefined') {
+		failure(res, next, 'The specified placeholder could not be found in the database',404);
+	}
 	success(res, next, placeholderCollection[parseInt(req.params.id)]);
 });
 
@@ -48,6 +51,9 @@ server.post('/placeholder', function(req, res, next){
 });
 
 server.put('/placeholder/:id', function(req, res, next){
+	if (typeof(placeholderCollection[req.params.id]) === 'undefined') {
+		failure(res, next, 'The specified placeholder could not be found in the database',404);
+	}
 	var placeholder = placeholderCollection[parseInt(req.params.id)];
 	var updates = req.params;
 	for (var field in updates){
@@ -57,6 +63,9 @@ server.put('/placeholder/:id', function(req, res, next){
 });
 
 server.del('/placeholder/:id', function(req, res, next){
+	if (typeof(placeholderCollection[req.params.id]) === 'undefined') {
+		failure(res, next, 'The specified placeholder could not be found in the database',404);
+	}
 	delete placeholderCollection[parseInt(req.params.id)];
 	success(res, next, [])
 });
