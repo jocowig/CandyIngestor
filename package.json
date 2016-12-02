@@ -1,0 +1,16 @@
+{
+  "name": "candyingestor",
+  "version": "1.0.0",
+  "description": "csv data ingestor project for ClearScholar",
+  "main": "candyingestor.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Cole Ludwig",
+  "license": "ISC",
+  "dependencies": {
+	"restify": "^4.3.0",
+    "mongoose": "^4.7.1",
+    "nodemon": "^1.11.0"
+  }
+}
