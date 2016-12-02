@@ -7,27 +7,58 @@ var server = restify.createServer({
 
 //placeholder collection
 var placeholderCollection = {};
-var idNum = 0;
+var id = 0;
 
 server.use(restify.acceptParser(server.acceptable));
 server.use(restify.bodyParser());
 
-server.get('/', function(req, res, next){
+function respond(res, next, status, data, http_code){
+	var response = {
+		'status': status,
+		'data': data
+	};
 	res.setHeader('content-type', 'application/json');
-	res.writeHead(200);
-	res.end(JSON.stringify(placeholderCollection));
+	res.writeHead(http_code);
+	res.end(JSON.stringify(response));
 	return next();
+}
+
+function success(res, next, data) {
+	respond(res, next, 'success', data, 200);
+}
+
+function failure(res, next, data, http_code){
+	respond(res, next, 'failure', data, http_code);
+}
+
+server.get('/', function(req, res, next){
+	success(res, next, placeholderCollection)
+});
+
+server.get('/placeholder/:id', function(req, res, next){
+	success(res, next, placeholderCollection[parseInt(req.params.id)]);
 });
 
 server.post('/placeholder', function(req, res, next){
 	var placeholder = req.params;
-	idNum++;
-	placeholder.id = idNum;
+	id++;
+	placeholder.id = id;
 	placeholderCollection[placeholder.id] = placeholder;
-	res.setHeader('content-type', 'application/json');
-	res.writeHead(200);
-	res.end(JSON.stringify(placeholder));
-	return next();
+	success(res, next, placeholder)
+});
+
+server.put('/placeholder/:id', function(req, res, next){
+	var placeholder = placeholderCollection[parseInt(req.params.id)];
+	var updates = req.params;
+	for (var field in updates){
+		placeholder[field] = updates[field]
+	}
+	success(res, next, placeholder);
+});
+
+server.del('/placeholder/:id', function(req, res, next){
+	delete placeholderCollection[parseInt(req.params.id)];
+	success(res, next, [])
 });
 
 server.listen(port, function () {
