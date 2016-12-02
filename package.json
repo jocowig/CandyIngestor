@@ -9,8 +9,9 @@
   "author": "Cole Ludwig",
   "license": "ISC",
   "dependencies": {
-	"restify": "^4.3.0",
     "mongoose": "^4.7.1",
-    "nodemon": "^1.11.0"
+    "nodemon": "^1.11.0",
+    "restify": "^4.3.0",
+    "restify-validator": "^0.3.1"
   }
 }

@@ -3,8 +3,9 @@ var	port = process.env.PORT || 3000;
 var server = restify.createServer({name: 'Candy Ingestor'});
 var setupController = require('./controllers/setupController.js');
 var placeholderController = require('./controllers/placeholderController.js');
+var restifyValidator = require('restify-validator');
 
-setupController(server, restify);
+setupController(server, restify, restifyValidator);
 placeholderController(server);
 
 server.listen(port, function () {
