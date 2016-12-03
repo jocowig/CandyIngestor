@@ -4,7 +4,10 @@ var server = restify.createServer({name: 'Candy Ingestor'});
 var setupController = require('./controllers/setupController.js');
 var placeholderController = require('./controllers/placeholderController.js');
 var restifyValidator = require('restify-validator');
+var mongoose = require('mongoose');
+var config = require('./config/dbConnection.js');
 
+mongoose.connect(config.getMongoConnection());
 setupController(server, restify, restifyValidator);
 placeholderController(server);
 

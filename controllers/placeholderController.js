@@ -23,14 +23,16 @@ module.exports = function(server){
 	});
 
 	server.post('/placeholder', function(req, res, next){
-		req.assert('first_name', 'First Name is required').notEmpty().isAlpha();
-		req.assert('last_name', 'Last Name is required').notEmpty().isAlpha();
-		req.assert('company', 'Company name is required').notEmpty();
-		req.assert('web_address', 'Web address is required and must be either .com, .tv, or .org').notEmpty().isUrl().contains('http://').contains('.com');
-		req.assert('candy_four', 'Candy Item 4 is required').notEmpty();
+		req.assert('company', 'Company name is required')
+			.notEmpty();
+		req.assert('web_address', 'Web address is required and must be either .com, .tv, or .org')
+			.notEmpty()
+			.isUrl()
+			.contains('http://')
+			.contains('.com');
 		var errors = req.validationErrors();
 		if(errors){
-			helpers.failure(res, next, errors[0], 400);
+			helpers.failure(res, next, errors, 400);
 		}
 		var placeholder = req.params;
 		max_id++;
