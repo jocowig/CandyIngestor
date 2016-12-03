@@ -5,19 +5,26 @@ var candyItemsModel = require('../models/candyItemsModel.js');
 module.exports = function(server){
 	
 	server.get('/', function(req, res, next){
-		helpers.success(res, next, companyCollection)
+		companyModel.find({}, function(err, company){
+			helpers.success(res, next, company);
+		});
 	});
 
 	server.get('/company/:id', function(req, res, next){
 		req.assert('id', 'Id is required').notEmpty();
 		var errors = req.validationErrors();
 		if(errors){
-			helpers.failure(res, next, errors[0], 400);
+			helpers.failure(res, next, errors, 400);
 		}
-		if (typeof(companyCollection[req.params.id]) === 'undefined') {
-			helpers.failure(res, next, 'The specified company could not be found in the database',404);
-		}
-		helpers.success(res, next, companyCollection[parseInt(req.params.id)]);
+		companyModel.findOne({ _id: req.params.id}, function(err, company){
+			if (err){
+				helpers.failure(res, next, 'Something went wrong fetching company from database');
+			}
+			if (company === null){
+				helpers.failure(res, next, 'The specified company could not be found', 404);
+			}
+			helpers.success(res, next, company);
+		});
 	});
 
 	server.post('/candyCompany', function(req, res, next){
@@ -59,22 +66,47 @@ module.exports = function(server){
 	});
 
 	server.put('/company/:id', function(req, res, next){
-		if (typeof(companyCollection[req.params.id]) === 'undefined') {
-			helpers.failure(res, next, 'The specified company could not be found in the database',404);
+		req.assert('id', 'Id is required').notEmpty();
+		var errors = req.validationErrors();
+		if(errors){
+			helpers.failure(res, next, errors, 400);
 		}
-		var company = companyCollection[parseInt(req.params.id)];
-		var updates = req.params;
-		for (var field in updates){
-			company[field] = updates[field]
-		}
-		helpers.success(res, next, company);
+		companyModel.findOne({ _id: req.params.id}, function(err, company){
+			if (err){
+				helpers.failure(res, next, 'Something went wrong fetching company from database');
+			}
+			if (company === null){
+				helpers.failure(res, next, 'The specified company could not be found', 404);
+			}
+			var updates = req.params;
+			delete updates.id;
+			for(var field in updates){
+				company[field] = updates[field]
+			}
+			company.save(function(err){
+				helpers.failure(res, next, 'Error updating company', 500);
+			});
+			helpers.success(res, next, company);
+		});
 	});
 
 	server.del('/company/:id', function(req, res, next){
-		if (typeof(companyCollection[req.params.id]) === 'undefined') {
-			helpers.failure(res, next, 'The specified company could not be found in the database',404);
+		req.assert('id', 'Id is required').notEmpty();
+		var errors = req.validationErrors();
+		if(errors){
+			helpers.failure(res, next, errors, 400);
 		}
-		delete companyCollection[parseInt(req.params.id)];
-		helpers.success(res, next, [])
+		companyModel.findOne({ _id: req.params.id}, function(err, company){
+			if (err){
+				helpers.failure(res, next, 'Something went wrong fetching company from database');
+			}
+			if (company === null){
+				helpers.failure(res, next, 'The specified company could not be found', 404);
+			}
+			company.remove(function(err){
+				helpers.failure(res, next, 'Error deleting company', 500);
+			});
+			helpers.success(res, next, company);
+		});
 	});
 }
