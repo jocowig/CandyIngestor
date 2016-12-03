@@ -27,7 +27,7 @@ module.exports = function(server){
 		});
 	});
 
-	server.post('/candyCompany', function(req, res, next){
+	server.post('/company', function(req, res, next){
 		req.assert('company', 'company name is required')
 			.notEmpty();
 		req.assert('web_address', 'Web address is required and must be either .com, .tv, or .org')
