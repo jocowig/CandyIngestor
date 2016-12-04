@@ -2,14 +2,24 @@ var helpers = require('../config/helperFunctions.js');
 var candyItemsModel = require('../models/candyItemsModel.js');
 
 module.exports = function(server){
+	
+	server.get('/candyItems', function(req, res, next){
+		candyItemsModel.find({}, function(err, candyItems){
+			if (err){
+				helpers.failure(res, next, 'Something went wrong fetching company from database');
+			}
+			if (candyItems === null){
+				helpers.failure(res, next, 'The specified company could not be found', 404);
+			}
+			helpers.success(res, next, candyItems);
+		});
+	});
 
 	server.get('/candyItems/:id', function(req, res, next){
 		req.assert('id', 'Id is required').notEmpty();
 		var errors = req.validationErrors();
 		if(errors){
-			helpers.failure(res, next, errors, 400);
-		}
-		candyItemsModel.findOne({ _id: req.params.id}, function(err, candyItems){
+			candyItemsModel.findOne({ _id: req.params.id}, function(err, candyItems){
 			if (err){
 				helpers.failure(res, next, 'Something went wrong fetching candyItems from database');
 			}
@@ -18,6 +28,7 @@ module.exports = function(server){
 			}
 			helpers.success(res, next, candyItems);
 		});
+		}
 	});
 
 	server.put('/candyItems/:id', function(req, res, next){

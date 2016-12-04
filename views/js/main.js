@@ -1,8 +1,13 @@
 function retrieveJSON(){
-	var url = 'http://localhost:3000/company';
-	$.getJSON(url, function(data) {
+	var companyURL = 'http://localhost:3000/company';
+	var candyURL = 'http://localhost:3000/candyItems';
+	$.getJSON(companyURL, function(data) {
         console.log(data)
 		populateCompanies(data);
+    });
+	$.getJSON(candyURL, function(data) {
+        console.log(data)
+		populateCandies(data);
     });
 }
 
@@ -14,6 +19,19 @@ populateCompanies = function(companies){
 		entry.appendChild(document.createTextNode(company.first_name+" "));
 		entry.appendChild(document.createTextNode(company.last_name+" "));
 		entry.appendChild(document.createTextNode(company.web_address+" "));
+		list.appendChild(entry);
+	});
+}
+
+populateCandies = function(candyItems){
+	var list = document.getElementById('companyList');
+	candyItems.data.forEach(function(candyItem){
+		var entry = document.createElement('li');
+		entry.appendChild(document.createTextNode(candyItem.company+" "));
+		entry.appendChild(document.createTextNode(candyItem.candy_one+" "));
+		entry.appendChild(document.createTextNode(candyItem.candy_two+" "));
+		entry.appendChild(document.createTextNode(candyItem.candy_three+" "));
+		entry.appendChild(document.createTextNode(candyItem.web_address+" "));
 		list.appendChild(entry);
 	});
 }
