@@ -7,6 +7,7 @@ var candyItemsController = require('./controllers/candyItemsController.js');
 var restifyValidator = require('restify-validator');
 var mongoose = require('mongoose');
 var config = require('./config/dbConnection.js');
+var companyModel = require('./models/companyModel.js');
 var fs = require('fs');
 
 mongoose.connect(config.getMongoConnection());
@@ -26,15 +27,23 @@ server.get(/\/?.*/, restify.serveStatic({
 	}));
 
 server.get('/', function indexHTML(req, res, next) {
-    fs.readFile(__dirname + '/index.html', function (err, data) {
-        if (err) {
-            next(err);
-            return;
-        }
+   	companyModel.find({}, function(err, company){
+		if (err){
+			helpers.failure(res, next, 'Something went wrong fetching companies from database');
+		}
+		if (company === null){
+			helpers.failure(res, next, 'The specified company could not be found', 404);
+		}
+		fs.readFile(__dirname + '/index.html', function (err, company) {
+			if (err) {
+				next(err);
+				return;
+			}
 
-        res.setHeader('Content-Type', 'text/html');
-        res.writeHead(200);
-        res.end(data);
-        next();
-    });
+			res.setHeader('Content-Type', 'text/html');
+			res.writeHead(200);
+			res.end(company);
+			next();
+		});
+	});
 });

@@ -4,13 +4,8 @@ var candyItemsModel = require('../models/candyItemsModel.js');
 
 module.exports = function(server){
 
-	server.get('/company/:id', function(req, res, next){
-		req.assert('id', 'Id is required').notEmpty();
-		var errors = req.validationErrors();
-		if(errors){
-			helpers.failure(res, next, errors, 400);
-		}
-		companyModel.findOne({ _id: req.params.id}, function(err, company){
+	server.get('/company', function(req, res, next){
+		companyModel.find({}, function(err, company){
 			if (err){
 				helpers.failure(res, next, 'Something went wrong fetching company from database');
 			}
@@ -19,6 +14,22 @@ module.exports = function(server){
 			}
 			helpers.success(res, next, company);
 		});
+	});
+	
+	server.get('/company/:id', function(req, res, next){
+		req.assert('id', 'Id is required').notEmpty();
+		var errors = req.validationErrors();
+		if(!errors){
+			companyModel.findOne({ _id: req.params.id}, function(err, company){
+				if (err){
+					helpers.failure(res, next, 'Something went wrong fetching company from database');
+				}
+				if (company === null){
+					helpers.failure(res, next, 'The specified company could not be found', 404);
+				}
+				helpers.success(res, next, company);
+			});
+		}
 	});
 
 	server.post('/company', function(req, res, next){

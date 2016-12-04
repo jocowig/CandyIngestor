@@ -3,9 +3,9 @@ function _respond(res, next, status, data, http_code){
 		'status': status,
 		'data': data
 	};
-	res.setHeader('content-type', 'text/html');
+	res.setHeader('content-type', 'application/json');
 	res.writeHead(http_code);
-	res.end();
+	res.end(JSON.stringify(response));
 }
 
 module.exports.success = function(res, next, data) {
