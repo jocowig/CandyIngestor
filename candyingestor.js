@@ -7,13 +7,34 @@ var candyItemsController = require('./controllers/candyItemsController.js');
 var restifyValidator = require('restify-validator');
 var mongoose = require('mongoose');
 var config = require('./config/dbConnection.js');
+var fs = require('fs');
 
 mongoose.connect(config.getMongoConnection());
 setupController(server, restify, restifyValidator);
 companyController(server);
 candyItemsController(server);
 
+
+
 server.listen(port, function () {
   console.log('%s listening at %s', server.name, server.url);
 });
 
+server.get(/\/?.*/, restify.serveStatic({
+		default: 'index.html',
+		directory: './views'
+	}));
+
+server.get('/', function indexHTML(req, res, next) {
+    fs.readFile(__dirname + '/index.html', function (err, data) {
+        if (err) {
+            next(err);
+            return;
+        }
+
+        res.setHeader('Content-Type', 'text/html');
+        res.writeHead(200);
+        res.end(data);
+        next();
+    });
+});

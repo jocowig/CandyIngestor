@@ -3,12 +3,6 @@ var companyModel = require('../models/companyModel.js');
 var candyItemsModel = require('../models/candyItemsModel.js');
 
 module.exports = function(server){
-	
-	server.get('/', function(req, res, next){
-		companyModel.find({}, function(err, company){
-			helpers.success(res, next, company);
-		});
-	});
 
 	server.get('/company/:id', function(req, res, next){
 		req.assert('id', 'Id is required').notEmpty();
