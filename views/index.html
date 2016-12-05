@@ -13,7 +13,7 @@
 <h1>Candy Ingestor</h1>
 
 <ul class="tab">
-  <li><a href="javascript:void(0)" class="tablinks" onclick="openTab(event, 'Home')" id="defaultOpen">Home</a></li>
+  <li><a href="javascript:void(0)" class="tablinks" onclick="openTab(event, 'Home'); retrieveJSON()" id="defaultOpen">Home</a></li>
   <li><a href="javascript:void(0)" class="tablinks" onclick="openTab(event, 'ParseCSV')">ParseCSV</a></li>
   <li><a href="javascript:void(0)" class="tablinks" onclick="openTab(event, 'AddCompany')">Add Company</a></li>
 </ul>
@@ -21,15 +21,18 @@
 <div id="Home" class="tabcontent">
   <h3>Home</h3>
   <p>This API will parse a csv file and place the data into two collections, Companies, and Candy Items</p>
-	<ul id="companyList"></ul>
+	<div id="companyTable"></div>
+	<br/><br/>
+	<div id="candyItemsTable"></div>
 </div>
 
 <div id="ParseCSV" class="tabcontent">
   <h3>Parse CSV</h3>
-  <form action='' method='POST' enctype='multipart/form-data'>
-    <input type='file' name='userFile'><br>
-    <input type='submit' name='upload_btn' value='upload'>
-	</form>
+  <input type="file" id="fileUpload" />
+	<input type="button" id="upload" value="Upload" onclick="Upload()" />
+	<hr />
+	<div id="dvCSV">
+	</div>
 </div>
 
 <div id="AddCompany" class="tabcontent">
