@@ -1,5 +1,51 @@
 <style>
-body {font-family: "Lato", sans-serif;}
+body {
+	font-family: "Lato", sans-serif;
+}
+
+div {
+    border-radius: 5px;
+    background-color: #f2f2f2;
+    padding: 20px;
+}
+
+div.heading {
+	text-align: center;
+}
+
+div.heading h1{
+	text-align: center;
+	color: #2aa7fb;
+	font-size: 3em;
+}
+
+input[type=text], select {
+    width: 100%;
+    padding: 12px 20px;
+    margin: 8px 0;
+    display: inline-block;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+input[type=submit], input[type=button] {
+    width: 100%;
+    background-color: #2aa7fb;
+    color: white;
+    padding: 14px 20px;
+    margin: 8px 0;
+    border: white;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+input[type=submit]:hover, input[type=button]:hover {
+    background-color: white;
+	color: #2aa7fb;
+	border: #2aa7fb;
+}
+
 
 ul.tab {
     list-style-type: none;

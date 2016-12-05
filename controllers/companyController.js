@@ -39,7 +39,7 @@ module.exports = function(server){
 			.notEmpty()
 			.isUrl()
 			.contains('http://')
-			.contains('.com');
+			.contains(['.com','.tv','.org']);
 		var errors = req.validationErrors();
 		var company = new companyModel();
 		var candyItems = new candyItemsModel();
@@ -56,17 +56,17 @@ module.exports = function(server){
 		candyItems.candy_one = req.params.candy_one;
 		candyItems.candy_two = req.params.candy_two;
 		candyItems.candy_three = req.params.candy_three;
+		candyItems.save(function(err){
+		if(err){
+			helpers.failure(res, next, errors, 500);
+			}
+			helpers.success(res, candyItems);
+		});
 		company.save(function(err){
 			if(err){
 				helpers.failure(res, next, errors, 500);
 			}
-			helpers.success(res, company);
-		});
-		candyItems.save(function(err){
-			if(err){
-				helpers.failure(res, next, errors, 500);
-			}
-			helpers.success(res, next, candyItems);
+			helpers.success(res, next, company);
 		});
 	});
 

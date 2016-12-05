@@ -22,9 +22,9 @@ server.listen(port, function () {
 });
 
 server.get(/\/?.*/, restify.serveStatic({
-		default: 'index.html',
-		directory: './views'
-	}));
+	default: 'index.html',
+	directory: './public'
+}));
 
 server.get('/', function indexHTML(req, res, next) {
    	companyModel.find({}, function(err, company){
