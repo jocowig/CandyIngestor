@@ -33,14 +33,8 @@ module.exports = function(server){
 	});
 
 	server.post('/company', function(req, res, next){
-		req.assert('company', 'company name is required')
-			.notEmpty();
-		req.assert('web_address', 'Web address is required and must be either .com, .tv, or .org')
-			.notEmpty()
-			.isUrl()
-			.contains('http://')
-			.contains(['.com','.tv','.org']);
-		var errors = req.validationErrors();
+		checkForDuplicates(req, res, next);
+		checkForErrors(req, res, next);
 		var company = new companyModel();
 		var candyItems = new candyItemsModel();
 		company.first_name = req.params.first_name;
@@ -57,18 +51,62 @@ module.exports = function(server){
 		candyItems.candy_two = req.params.candy_two;
 		candyItems.candy_three = req.params.candy_three;
 		candyItems.save(function(err){
-		if(err){
-			helpers.failure(res, next, errors, 500);
+			if(err){
+				helpers.failure(res, next, err, 500);
 			}
 			helpers.success(res, candyItems);
 		});
 		company.save(function(err){
 			if(err){
-				helpers.failure(res, next, errors, 500);
+				helpers.failure(res, next, err, 500);
 			}
 			helpers.success(res, next, company);
 		});
 	});
+	
+	checkForDuplicates = function(req, res, next){
+		error = "";
+		if(req.params.company == ""){
+			companyModel.find({web_address: req.params.web_address, last_name: req.params.last_name}, function(err, companyData){
+				if(companyData.length > 0){
+					companyData.forEach(function(match){
+						if(match.first_name == req.params.first_name){
+							console.log("dupses")
+							error = "Duplicate, web_address, first and last names match, and company is null";
+							helpers.failure(res, next, error, 500);
+						}
+						if(match.first_name[0] == req.params.first_name[0]){
+							console.log("qs")
+							error = "Questionable, web_address, and last names match, company is null, and first initial of first name matches";
+							helpers.failure(res, next, error, 500);
+						}
+					});
+					helpers.failure(res, next, "Company name is required", 400);
+				}
+			});
+		}
+		companyModel.find({web_address: req.params.web_address, company: req.params.company}, function(err, companyData){
+			if(companyData.length > 0){
+				console.log("should be dups");
+				error = "Duplicate, web_address and company name match with existing records"
+				helpers.failure(res, next, error, 500);
+			}
+		});
+		return "";
+	}
+	
+	checkForErrors = function(req, res, next){
+		if(req.params.web_address == ""){
+			helpers.failure(res, next, "Web address is required", 400);
+		}
+		if(req.params.web_address.indexOf("http://") < 0){
+			helpers.failure(res, next, "Web address must contain http://", 400);
+		}
+		var dotComDotTvOrDotOrg = (req.params.web_address.indexOf(".com") >=0 || req.params.web_address.indexOf(".tv") >=0 || req.params.web_address.indexOf(".org") >= 0);
+		if(!dotComDotTvOrDotOrg){
+			helpers.failure(res, next, "Web address must contain .com, .tv, or .org", 400);
+		}
+	}
 
 	server.put('/company/:id', function(req, res, next){
 		req.assert('id', 'Id is required').notEmpty();
