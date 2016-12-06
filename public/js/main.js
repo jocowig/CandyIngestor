@@ -67,7 +67,9 @@ function Upload() {
 				addToTable(rows[increment]);
 				var dvCSV = document.getElementById("dvCSV");
                 dvCSV.innerHTML = "";
-                dvCSV.appendChild(table);
+                if(document.getElementById("ShowTable").checked){
+					dvCSV.appendChild(table);
+				}
 			}
             reader.readAsText(fileUpload.files[0]);
         } else {
@@ -125,7 +127,10 @@ function giveFeedback(){
 	if(errors.length > 0){
 		document.getElementById("status").innerHTML = document.getElementById("status").innerHTML + 
 		("<p>Ingestion and data transfer process successfully completed - please review report as possible duplicative data was found.</p><br/><p>"
-		+ successfulEntries + " items added!</p> <br/> <p> Errors: </p>" + errors );
+		+ successfulEntries + " items added!</p> <br/>");
+		if(document.getElementById("ShowErrors").checked){
+			document.getElementById("status").innerHTML = document.getElementById("status").innerHTML + ("<p> Errors: </p>" + errors );
+		}
 	}
 	else{
 		console.log(errors);

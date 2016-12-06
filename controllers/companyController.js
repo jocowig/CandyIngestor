@@ -81,8 +81,8 @@ module.exports = function(server, fs){
 				}
 			});
 		}
-		companyModel.find({web_address: req.params.web_address, company: req.params.company}, function(err, companyData){
-			if(companyData.length > 0){
+		companyModel.findOne({web_address: req.params.web_address, company: req.params.company}, function(err, companyData){
+			if(companyData != null){
 				writeErrorsToFiles(dupFile, "Duplicate, web_address and company name match with existing records \n", req.params);
 				helpers.failure(res, next, "Duplicate, web_address and company name match with existing records<br/>", 400);
 				return;

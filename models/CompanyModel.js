@@ -14,6 +14,7 @@ var companySchema = new Schema({
 	phone_number	:	String,
 	date	:	Date
 });
+companySchema.index({first_name:-1, last_name:-1, email: -1, ip_address: -1, company:1, web_address:1, phone_number:-1, date:-1});
 
 var companyModel = mongoose.model('company', companySchema);
 
