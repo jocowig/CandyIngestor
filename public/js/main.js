@@ -88,7 +88,7 @@ function postCSVToDatabase(parsedRow){
 	  success: function(data) {
 			successfulEntries += 1;
 			increment += 1;
-			if(i>=totalElems-1){
+			if(increment>=totalElems-1){
 				giveFeedback();
 			}
 			else{
@@ -123,11 +123,15 @@ function addToTable(nextRow){
 
 function giveFeedback(){
 	if(errors.length > 0){
-		document.getElementById("status").appendChild(document.createTextNode("Ingestion and data transfer process successfully completed - please review report as possible duplicative data was found.\n\r"+ successfulEntries + " items added!\n\r" + errors ));
+		document.getElementById("status").innerHTML = document.getElementById("status").innerHTML + 
+		("<p>Ingestion and data transfer process successfully completed - please review report as possible duplicative data was found.</p><br/><p>"
+		+ successfulEntries + " items added!</p> <br/> <p> Errors: </p>" + errors );
 	}
 	else{
 		console.log(errors);
-		document.getElementById("status").appendChild(document.createTextNode("Ingestion and data transfer process successfully completed!" + successfulEntries + " items added!"));
+		document.getElementById("status").innerHTML = document.getElementById("status").innerHTML +
+		("<p>Ingestion and data transfer process successfully completed!</p><br/><p>" 
+		+ successfulEntries + " items added!</p>");
 	}
 }
 

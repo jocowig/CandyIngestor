@@ -36,8 +36,6 @@ module.exports = function(server, fs){
 
 	server.post('/company', function(req, res, next){
 		checkForErrors(req, res, next);
-		checkForDuplicates(req, res, next);
-		
 		var company = new companyModel();
 		var candyItems = new candyItemsModel();
 		company.first_name = req.params.first_name;
@@ -64,18 +62,19 @@ module.exports = function(server, fs){
 	});
 	
 	checkForDuplicates = function(req, res, next){
-		error = "Ingestion and data transfer process successfully completed - please review report as possible duplicative data was found.";
 		if(req.params.company == ""){
 			companyModel.find({web_address: req.params.web_address, last_name: req.params.last_name}, function(err, companyData){
 				if(companyData.length > 0){
 					companyData.forEach(function(match){
 						if(match.first_name == req.params.first_name){
 							writeErrorsToFiles(dupFile, "Duplicate, web_address, first and last names match, and company is null \n", req.params);
-							helpers.failure(res, next, error, 500);
+							helpers.failure(res, next, "Duplicate, web_address, first and last names match, and company is null<br/>", 400);
+							return;
 						}
-						if(match.first_name[0] == req.params.first_name[0]){
+						else if(match.first_name[0] == req.params.first_name[0]){
 							writeErrorsToFiles(dupFile, "Questionable, web_address, and last names match, company is null, and first initial of first name matches \n", req.params);
-							helpers.failure(res, next, error, 500);
+							helpers.failure(res, next, "Questionable, web_address, and last names match, company is null, and first initial of first name matches<br/>", 400);
+							return;
 						}
 					});
 					
@@ -84,42 +83,47 @@ module.exports = function(server, fs){
 		}
 		companyModel.find({web_address: req.params.web_address, company: req.params.company}, function(err, companyData){
 			if(companyData.length > 0){
-				writeErrorsToFiles(dupFile, "Duplicate, web_address and company name match with existing records", req.params);
-				helpers.failure(res, next, error, 500);
+				writeErrorsToFiles(dupFile, "Duplicate, web_address and company name match with existing records \n", req.params);
+				helpers.failure(res, next, "Duplicate, web_address and company name match with existing records<br/>", 400);
+				return;
 			}
 		});
-		return "";
 	}
 	
 	checkForErrors = function(req, res, next){
+		var dotComDotTvOrDotOrg = (req.params.web_address.indexOf(".com") >=0 || req.params.web_address.indexOf(".tv") >=0 || req.params.web_address.indexOf(".org") >= 0);
 		if(req.params.web_address == ""){
 			writeErrorsToFiles(valFile, "Web address is required \n" + req.params);
-			helpers.failure(res, next, "Web address is required", 400);
+			helpers.failure(res, next, "Web address is required<br/>", 400);
+			return;
 		}
-		if(req.params.web_address.indexOf("http://") < 0){
+		else if(req.params.web_address.indexOf("http://") < 0){
 			writeErrorsToFiles(valFile, "Web address must contain http:// \n", req.params);
-			helpers.failure(res, next, "Web address must contain http://", 400);
+			helpers.failure(res, next, "Web address must contain http://<br/>", 400);
+			return;
 		}
-		var dotComDotTvOrDotOrg = (req.params.web_address.indexOf(".com") >=0 || req.params.web_address.indexOf(".tv") >=0 || req.params.web_address.indexOf(".org") >= 0);
-		if(!dotComDotTvOrDotOrg){
+		else if(!dotComDotTvOrDotOrg){
 			writeErrorsToFiles(valFile, "Web address must contain .com, .tv, or .org", req.params);
-			helpers.failure(res, next, "Web address must contain .com, .tv, or .org \n", 400);
+			helpers.failure(res, next, "Web address must contain .com, .tv, or .org<br/>", 400);
+			return;
 		}
-		if(req.params.company == ""){
-			console.log(req.params.toString());
+		else if(req.params.company == ""){
 			writeErrorsToFiles(valFile, "Company name is required \n", req.params);
-			helpers.failure(res, next, "Company name is required" , 400);
+			helpers.failure(res, next, "Company name is required<br/>" , 400);
+			return;
+		}
+		else{
+		checkForDuplicates(req, res, next);
 		}
 	}
 	
 	writeErrorsToFiles = function(file, error, data){
-		fs.open(file, 'a', 666, function( e, id ) {
-			fs.write( id,"\r\n" + error + ":\r\n", null, 'utf8')
-			for(param in data){
-				fs.write( id, param + " : " + data[param] + "\r\n", null, 'utf8')
-			}
-			fs.close();
-		});
+		var logStream = fs.createWriteStream(file, {'flags': 'a'});
+		logStream.write("\r\n" + error + ":\r\n");
+		for(param in data){
+			logStream.write(param + " : " + data[param] + "\r\n");
+		}
+		logStream.end();
 	}	
 				
 	server.put('/company/:id', function(req, res, next){
