@@ -45,6 +45,9 @@ populateCandies = function(candyItems){
 }
 
 function Upload() {
+	var errors = [];
+	var successfulEntries = 0;
+	var increment = 1;
 	var outputArray = {};
 	var fileUpload = document.getElementById("fileUpload");
 	var regex = /^([a-zA-Z0-9\s_\\.\-:])+(.csv|.txt)$/;
@@ -55,7 +58,7 @@ function Upload() {
                 var table = document.createElement("table");
                 var rows = e.target.result.split("\n");
 				var keys = rows[0].split(",")
-                for (var i = 1; i < rows.length; i++) {
+                for (var i = 1; i < rows.length-1; i++) {
                     var row = table.insertRow(-1);
                     var cells = rows[i].split(",");
                     for (var j = 0; j < cells.length; j++) {
@@ -68,12 +71,34 @@ function Upload() {
 					  data: outputArray,
 					  type: 'post',
 					  success: function(data) {
-						
-					  }
+							successfulEntries += 1;
+							increment +=1
+							if(i>=rows.length){
+								console.log("got here");
+								if(errors.length > 0){
+									document.getElementById("status").appendChild(document.createTextNode("Ingestion and data transfer process successfully completed - please review report as possible duplicative data was found."));
+								}
+								else{
+									console.log(errors);
+									document.getElementById("status").appendChild(document.createTextNode("Ingestion and data transfer process successfully completed!" + successfulEntries + " items added!"));
+								}
+							}
+					}})
+					  .fail(function($xhr) {
+						  increment += 1
+						errors.push($xhr.responseJSON.data);
+					  if(increment>=rows.length-1){
+								if(errors.length > 0){
+									document.getElementById("status").appendChild(document.createTextNode("Ingestion and data transfer process successfully completed - please review report as possible duplicative data was found.\n\r"+ successfulEntries + " items added!\n\r" + errors ));
+								}
+								else{
+									console.log(errors);
+									document.getElementById("status").appendChild(document.createTextNode("Ingestion and data transfer process successfully completed!" + successfulEntries + " items added!"));
+								}
+							}
 					});
-                }
-				//alert(“Ingestion and data transfer process successfully completed!”);
-                var dvCSV = document.getElementById("dvCSV");
+				}
+				var dvCSV = document.getElementById("dvCSV");
                 dvCSV.innerHTML = "";
                 dvCSV.appendChild(table);
 			}

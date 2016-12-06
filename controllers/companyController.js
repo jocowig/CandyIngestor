@@ -53,36 +53,28 @@ module.exports = function(server, fs){
 		candyItems.candy_one = req.params.candy_one;
 		candyItems.candy_two = req.params.candy_two;
 		candyItems.candy_three = req.params.candy_three;
-		
-		candyItems.save(function(err){
-			if(err){
-				helpers.failure(res, next, err, 500);
-			}
-			helpers.success(res, candyItems);
-		});
-		
 		company.save(function(err){
 			if(err){
 				helpers.failure(res, next, err, 500);
 			}
+			candyItems.save();
 			helpers.success(res, next, company);
 		});
+		
 	});
 	
 	checkForDuplicates = function(req, res, next){
-		error = "";
+		error = "Ingestion and data transfer process successfully completed - please review report as possible duplicative data was found.";
 		if(req.params.company == ""){
 			companyModel.find({web_address: req.params.web_address, last_name: req.params.last_name}, function(err, companyData){
 				if(companyData.length > 0){
 					companyData.forEach(function(match){
 						if(match.first_name == req.params.first_name){
 							writeErrorsToFiles(dupFile, "Duplicate, web_address, first and last names match, and company is null \n", req.params);
-							error = "Duplicate, web_address, first and last names match, and company is null";
 							helpers.failure(res, next, error, 500);
 						}
 						if(match.first_name[0] == req.params.first_name[0]){
 							writeErrorsToFiles(dupFile, "Questionable, web_address, and last names match, company is null, and first initial of first name matches \n", req.params);
-							error = "Questionable, web_address, and last names match, company is null, and first initial of first name matches";
 							helpers.failure(res, next, error, 500);
 						}
 					});
@@ -93,7 +85,6 @@ module.exports = function(server, fs){
 		companyModel.find({web_address: req.params.web_address, company: req.params.company}, function(err, companyData){
 			if(companyData.length > 0){
 				writeErrorsToFiles(dupFile, "Duplicate, web_address and company name match with existing records", req.params);
-				error = "Duplicate, web_address and company name match with existing records";
 				helpers.failure(res, next, error, 500);
 			}
 		});
@@ -121,16 +112,15 @@ module.exports = function(server, fs){
 		}
 	}
 	
-	writeErrorsToFiles = function(file, error, data)
-		{
-			fs.open(file, 'a', 666, function( e, id ) {
-				fs.write( id,"\r\n" + error + ":\r\n", null, 'utf8')
-				for(param in data){
-					fs.write( id, param + " : " + data[param] + "\r\n", null, 'utf8')
-				}
-				fs.close();
-			});
-		}	
+	writeErrorsToFiles = function(file, error, data){
+		fs.open(file, 'a', 666, function( e, id ) {
+			fs.write( id,"\r\n" + error + ":\r\n", null, 'utf8')
+			for(param in data){
+				fs.write( id, param + " : " + data[param] + "\r\n", null, 'utf8')
+			}
+			fs.close();
+		});
+	}	
 				
 	server.put('/company/:id', function(req, res, next){
 		req.assert('id', 'Id is required').notEmpty();
