@@ -12,7 +12,7 @@ var fs = require('fs');
 
 mongoose.connect(config.getMongoConnection());
 setupController(server, restify, restifyValidator);
-companyController(server);
+companyController(server, fs);
 candyItemsController(server);
 
 
