@@ -1,3 +1,11 @@
+var insertCount = 0;
+var errors = [];
+var successfulEntries = 0;
+var totalElems = 0;
+var table;
+var keys;
+var rows;
+
 function retrieveJSON(){
 	var companyURL = 'http://localhost:3000/company';
 	var candyURL = 'http://localhost:3000/candyItems';
@@ -45,59 +53,18 @@ populateCandies = function(candyItems){
 }
 
 function Upload() {
-	var errors = [];
-	var successfulEntries = 0;
-	var increment = 1;
-	var outputArray = {};
+	increment = 1;
 	var fileUpload = document.getElementById("fileUpload");
 	var regex = /^([a-zA-Z0-9\s_\\.\-:])+(.csv|.txt)$/;
     if (regex.test(fileUpload.value.toLowerCase())) {
         if (typeof (FileReader) != "undefined") {
             var reader = new FileReader();
             reader.onload = function (e) {
-                var table = document.createElement("table");
-                var rows = e.target.result.split("\n");
-				var keys = rows[0].split(",")
-                for (var i = 1; i < rows.length-1; i++) {
-                    var row = table.insertRow(-1);
-                    var cells = rows[i].split(",");
-                    for (var j = 0; j < cells.length; j++) {
-                       var cell = row.insertCell(-1);
-                       cell.innerHTML = cells[j];
-						outputArray[keys[j]] = cells[j];
-					}
-					$.ajax({
-					  url: 'http://localhost:3000/company',
-					  data: outputArray,
-					  type: 'post',
-					  success: function(data) {
-							successfulEntries += 1;
-							increment +=1
-							if(i>=rows.length){
-								console.log("got here");
-								if(errors.length > 0){
-									document.getElementById("status").appendChild(document.createTextNode("Ingestion and data transfer process successfully completed - please review report as possible duplicative data was found."));
-								}
-								else{
-									console.log(errors);
-									document.getElementById("status").appendChild(document.createTextNode("Ingestion and data transfer process successfully completed!" + successfulEntries + " items added!"));
-								}
-							}
-					}})
-					  .fail(function($xhr) {
-						  increment += 1
-						errors.push($xhr.responseJSON.data);
-					  if(increment>=rows.length-1){
-								if(errors.length > 0){
-									document.getElementById("status").appendChild(document.createTextNode("Ingestion and data transfer process successfully completed - please review report as possible duplicative data was found.\n\r"+ successfulEntries + " items added!\n\r" + errors ));
-								}
-								else{
-									console.log(errors);
-									document.getElementById("status").appendChild(document.createTextNode("Ingestion and data transfer process successfully completed!" + successfulEntries + " items added!"));
-								}
-							}
-					});
-				}
+                table = document.createElement("table");
+                rows = e.target.result.split("\n");
+				keys = rows[0].split(",")
+                totalElems = rows.length;
+				addToTable(rows[increment]);
 				var dvCSV = document.getElementById("dvCSV");
                 dvCSV.innerHTML = "";
                 dvCSV.appendChild(table);
@@ -109,6 +76,59 @@ function Upload() {
     } else {
         alert("Please upload a valid CSV file.");
     }
+}
+
+function postCSVToDatabase(parsedRow){
+	console.log({parsedRow : parsedRow})
+	$.ajax({
+	  url: 'http://localhost:3000/company',
+	  type: 'post',
+	  dataType: 'json',
+	  data: parsedRow,
+	  success: function(data) {
+			successfulEntries += 1;
+			increment += 1;
+			if(i>=totalElems-1){
+				giveFeedback();
+			}
+			else{
+				addToTable(rows[increment]);
+			}
+	}})
+	  .fail(function($xhr) {
+		increment += 1;
+		errors.push($xhr.responseJSON.data);
+		console.log(errors);
+		if(increment>=totalElems-1){
+			giveFeedback();
+		}
+		else{
+			addToTable(rows[increment]);
+		}
+	});
+}
+
+function addToTable(nextRow){
+	var outputArray = {};
+	var row = table.insertRow(-1);
+	var cells = nextRow.split(",");
+	for (var j = 0; j < cells.length; j++) {
+	   var cell = row.insertCell(-1);
+	   cell.innerHTML = cells[j];
+	   outputArray[keys[j]] = cells[j]
+	}
+	console.log(outputArray);
+	postCSVToDatabase(outputArray);
+}
+
+function giveFeedback(){
+	if(errors.length > 0){
+		document.getElementById("status").appendChild(document.createTextNode("Ingestion and data transfer process successfully completed - please review report as possible duplicative data was found.\n\r"+ successfulEntries + " items added!\n\r" + errors ));
+	}
+	else{
+		console.log(errors);
+		document.getElementById("status").appendChild(document.createTextNode("Ingestion and data transfer process successfully completed!" + successfulEntries + " items added!"));
+	}
 }
 
 function openTab(evt, tabName) {
